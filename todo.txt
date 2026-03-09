@@ -1,0 +1,22 @@
+-> show menu items (could be just link)
+
+-> restaurant info - > give address
+
+-> contact restaurant -> contact admin via chat or get contact information -> contact admin -> sends reply to admin via bot
+
+-> in bot you can specify admins in .env
+
+-> table reservation (add/remove reservation). Each customer will have configured reservation limit
+
+reservation can only be active if in future
+
+-> menu suggestions -> enters ai chatbot that searches menu via RAG and gives reccomendations
+
+
+
+
+admins 
+-> can cancel, book reservation by any phone number, 
+-> answer client support messages
+
+
