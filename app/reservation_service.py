@@ -3,8 +3,9 @@ Reservation business logic.
 
 Rules:
 - A customer can only hold 1 active future reservation at a time.
-- They must cancel it (or wait for it to pass) before booking a new one.
-- Capacity per day is controlled by settings.RESERVATION_CAPACITY.
+- Table is auto-assigned: smallest table that fits the guest count and is free
+  for the requested date/time slot. If none found, ReservationError is raised
+  with a helpful message listing what IS available.
 - Restaurant is only open on days listed in settings.RESERVATION_OPEN_DAYS.
 - Reservations can only be made up to settings.RESERVATION_MAX_ADVANCE_DAYS ahead.
 """
@@ -12,11 +13,11 @@ Rules:
 import datetime
 from typing import Optional
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import settings
-from app.models import Reservation, ReservationStatus
+from app.models import Reservation, ReservationStatus, RestaurantTable
 
 
 # ── Exceptions ────────────────────────────────────────────────────────────────
@@ -42,16 +43,85 @@ async def get_active_reservation(session: AsyncSession, phone: str) -> Optional[
     return result.scalar_one_or_none()
 
 
-async def count_guests_on_date(session: AsyncSession, date: datetime.date) -> int:
-    """Total guests booked on a given date (confirmed reservations only)."""
-    result = await session.execute(
-        select(func.coalesce(func.sum(Reservation.guests), 0))
+async def find_free_table(
+    session: AsyncSession,
+    date: datetime.date,
+    start_time: datetime.time,
+    end_time: datetime.time,
+    guests: int,
+) -> RestaurantTable:
+    """
+    Find the smallest active table that fits `guests` and has no overlapping
+    confirmed reservation on the given date/time slot.
+
+    Raises ReservationError if none found, with a message showing what's available.
+    """
+    # All active tables that can seat the requested guests, smallest first
+    tables_result = await session.execute(
+        select(RestaurantTable)
+        .where(
+            RestaurantTable.is_active == True,
+            RestaurantTable.capacity >= guests,
+        )
+        .order_by(RestaurantTable.capacity)
+    )
+    candidate_tables = tables_result.scalars().all()
+
+    if not candidate_tables:
+        # No tables exist at all that fit — show what the max capacity is
+        max_result = await session.execute(
+            select(RestaurantTable)
+            .where(RestaurantTable.is_active == True)
+            .order_by(RestaurantTable.capacity.desc())
+            .limit(1)
+        )
+        biggest = max_result.scalar_one_or_none()
+        if biggest:
+            raise ReservationError(
+                f"❌ No table available for {guests} guests. "
+                f"Our largest available table seats {biggest.capacity}."
+            )
+        raise ReservationError("❌ No tables are currently available")
+
+    # Find booked table IDs for overlapping time slots on this date
+    booked_result = await session.execute(
+        select(Reservation.table_id)
         .where(
             Reservation.reservation_date == date,
             Reservation.status == ReservationStatus.CONFIRMED,
+            Reservation.table_id.isnot(None),
+            # Overlap condition: existing starts before our end AND ends after our start
+            Reservation.start_time < end_time,
+            Reservation.end_time > start_time,
         )
     )
-    return result.scalar_one()
+    booked_table_ids = {row[0] for row in booked_result.all()}
+
+    # Pick the first (smallest fitting) table that isn't booked
+    for table in candidate_tables:
+        if table.id not in booked_table_ids:
+            return table
+
+    # All fitting tables are taken — tell the customer what's free
+    free_result = await session.execute(
+        select(RestaurantTable)
+        .where(
+            RestaurantTable.is_active == True,
+            RestaurantTable.id.notin_(booked_table_ids),
+        )
+        .order_by(RestaurantTable.capacity.desc())
+        .limit(1)
+    )
+    biggest_free = free_result.scalar_one_or_none()
+
+    if biggest_free:
+        raise ReservationError(
+            f"❌ No free table for {guests} guests at that time. "
+            f"The largest available table seats {biggest_free.capacity}."
+        )
+    raise ReservationError(
+        f"❌ No free tables at that time. Please choose a different time slot."
+    )
 
 
 # ── Validation ────────────────────────────────────────────────────────────────
@@ -75,22 +145,6 @@ def validate_date(date: datetime.date) -> None:
         )
 
 
-async def validate_capacity(session: AsyncSession, date: datetime.date, guests: int) -> None:
-    booked = await count_guests_on_date(session, date)
-    remaining = settings.RESERVATION_CAPACITY - booked
-
-    if remaining <= 0:
-        raise ReservationError(
-            f"❌ Sorry, we're fully booked on {date.strftime('%d.%m.%Y')}. "
-            "Please choose another date."
-        )
-    if guests > remaining:
-        raise ReservationError(
-            f"❌ Only {remaining} seat(s) left on {date.strftime('%d.%m.%Y')}. "
-            "Please reduce the number of guests or pick another date."
-        )
-
-
 # ── Write operations ──────────────────────────────────────────────────────────
 
 async def create_reservation(
@@ -103,7 +157,8 @@ async def create_reservation(
     guests: int,
 ) -> Reservation:
     validate_date(date)
-    await validate_capacity(session, date, guests)
+
+    table = await find_free_table(session, date, start_time, end_time, guests)
 
     reservation = Reservation(
         phone=phone,
@@ -112,12 +167,13 @@ async def create_reservation(
         start_time=start_time,
         end_time=end_time,
         guests=guests,
+        table_id=table.id,
         status=ReservationStatus.CONFIRMED,
     )
     session.add(reservation)
     await session.commit()
     await session.refresh(reservation)
-    return reservation
+    return reservation, table
 
 
 async def cancel_reservation(session: AsyncSession, reservation: Reservation) -> None:

@@ -54,3 +54,10 @@ RESERVATION_OPEN_DAYS: list[int] = [
 ]
 # Max advance days a reservation can be made
 RESERVATION_MAX_ADVANCE_DAYS = int(os.getenv("RESERVATION_MAX_ADVANCE_DAYS", "30"))
+
+# --- CORS ---
+CORS_ORIGINS: list[str] = [
+    o.strip()
+    for o in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+    if o.strip()
+]

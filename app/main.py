@@ -18,27 +18,29 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Response
 
 from app import settings
-from app.db import async_session_maker, engine
+from app.db import async_sessionmaker, engine
 from app.handlers import HANDLERS
 from app.models import Base
+from fastapi.middleware.cors import CORSMiddleware
 from app.redis_client import get_or_create_session, save_session
 from app.senders import send_admin_reply_to_client, send_main_menu
+from app.tables_router import router as tables_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-# ── App lifecycle ─────────────────────────────────────────────────────────────
+app = FastAPI()
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    yield
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-
-app = FastAPI(lifespan=lifespan)
-
+app.include_router(tables_router)
 
 # ── Webhook verification (GET) ────────────────────────────────────────────────
 
@@ -127,7 +129,7 @@ async def _route(phone: str, text: str) -> None:
         await save_session(phone, session)
         return
 
-    async with async_session_maker() as db:
+    async with async_sessionmaker() as db:
         await handler(phone, session, text, db)
 
     await save_session(phone, session)

@@ -22,6 +22,7 @@ from app.reservation_service import (
     ReservationError,
     cancel_reservation,
     create_reservation,
+    find_free_table,
     get_active_reservation,
     validate_date,
 )
@@ -140,28 +141,7 @@ async def handle_contact_chat(phone: str, session: dict, text: str, db: AsyncSes
     )
 
 
-# ── RESERVATION (multi-step: date → time → end_time → guests → guest_name → confirm) ──
-
-RESERVATION_STEP_HANDLERS = {
-    "date":         _reservation_date,
-    "time":         _reservation_time,
-    "end_time":     _reservation_end_time,
-    "guests":       _reservation_guests,
-    "guest_name":   _reservation_guest_name,
-    "confirm":      _reservation_confirm,
-    "has_existing": _reservation_has_existing,
-}
-
-
-async def handle_reservation(phone: str, session: dict, text: str, db: AsyncSession) -> None:
-    ctx = session.setdefault("current_context", {})
-    step = ctx.get("step", "date")
-    handler = RESERVATION_STEP_HANDLERS.get(step)
-    if handler:
-        await handler(phone, ctx, text, db, session)
-
-
-# ── Step handlers ─────────────────────────────────────────────────────────────
+# ── RESERVATION step handlers ─────────────────────────────────────────────────
 
 async def _reservation_date(phone, ctx, text, db, session):
     existing = await get_active_reservation(db, phone)
@@ -221,6 +201,19 @@ async def _reservation_guests(phone, ctx, text, db, session):
     if guests is None:
         return
 
+    # Check table availability before proceeding — no point asking for a name if no table fits
+    try:
+        await find_free_table(
+            db,
+            date=datetime.date.fromisoformat(ctx["date"]),
+            start_time=datetime.time.fromisoformat(ctx["start_time"]),
+            end_time=datetime.time.fromisoformat(ctx["end_time"]),
+            guests=guests,
+        )
+    except ReservationError as e:
+        send_text(phone, str(e))
+        return
+
     ctx.update(guests=guests, step="guest_name")
     send_reservation_name_prompt(phone)
 
@@ -265,7 +258,7 @@ async def _reservation_confirm(phone, ctx, text, db, session):
         return
 
     try:
-        reservation = await create_reservation(
+        reservation, table = await create_reservation(
             db,
             phone=phone,
             guest_name=ctx["guest_name"],
@@ -274,7 +267,7 @@ async def _reservation_confirm(phone, ctx, text, db, session):
             end_time=datetime.time.fromisoformat(ctx["end_time"]),
             guests=ctx["guests"],
         )
-        send_text(phone, _confirmed_message(reservation))
+        send_text(phone, _confirmed_message(reservation, table))
         go_back(session)
     except ReservationError as e:
         send_text(phone, str(e))
@@ -341,15 +334,37 @@ def _fmt(date: datetime.date) -> str:
     return date.strftime("%d.%m.%Y")
 
 
-def _confirmed_message(r) -> str:
+def _confirmed_message(r, table) -> str:
     return (
         f"🎉 *Reservation Confirmed!*\n\n"
         f"📅 {r.reservation_date.strftime('%d.%m.%Y')}"
         f"  🕐 {r.start_time.strftime('%H:%M')} — {r.end_time.strftime('%H:%M')}\n"
-        f"👤 {r.guest_name}  👥 {r.guests} guests\n\n"
+        f"👤 {r.guest_name}  👥 {r.guests} guests\n"
+        f"🪑 Table: {table.name}\n\n"
         f"We look forward to seeing you! 🍽\n\n"
         f"Type *back* to return to the main menu."
     )
+
+
+# ── RESERVATION dispatcher (defined after step functions so names are resolved) ──
+
+RESERVATION_STEP_HANDLERS = {
+    "date":         _reservation_date,
+    "time":         _reservation_time,
+    "end_time":     _reservation_end_time,
+    "guests":       _reservation_guests,
+    "guest_name":   _reservation_guest_name,
+    "confirm":      _reservation_confirm,
+    "has_existing": _reservation_has_existing,
+}
+
+
+async def handle_reservation(phone: str, session: dict, text: str, db: AsyncSession) -> None:
+    ctx = session.setdefault("current_context", {})
+    step = ctx.get("step", "date")
+    handler = RESERVATION_STEP_HANDLERS.get(step)
+    if handler:
+        await handler(phone, ctx, text, db, session)
 
 
 # ---------------------------------------------------------------------------
