@@ -9,6 +9,50 @@ export interface Table {
   updated_at: string;
 }
 
+export interface TableNested {
+  id: number;
+  name: string;
+  capacity: number;
+}
+
+export type ReservationStatus = "confirmed" | "completed" | "cancelled" | "no_show";
+
+export interface Reservation {
+  id: number;
+  guest_name: string;
+  phone: string;
+  table_id: number | null;
+  table: TableNested | null;
+  reservation_date: string;
+  start_time: string;
+  end_time: string;
+  guests: number;
+  status: ReservationStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReservationCreatePayload {
+  guest_name: string;
+  phone: string;
+  reservation_date: string;
+  start_time: string;
+  end_time: string;
+  guests: number;
+  table_id?: number | null;
+}
+
+export interface ReservationUpdatePayload {
+  guest_name?: string;
+  phone?: string;
+  reservation_date?: string;
+  start_time?: string;
+  end_time?: string;
+  guests?: number;
+  table_id?: number | null;
+  status?: ReservationStatus;
+}
+
 // ── Config ───────────────────────────────────────────────────────────────────
 
 export const API_BASE =

@@ -25,6 +25,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.redis_client import get_or_create_session, save_session
 from app.senders import send_admin_reply_to_client, send_main_menu
 from app.tables_router import router as tables_router
+from app.reservations_router import router as reservations_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -41,6 +42,7 @@ app.add_middleware(
 )
 
 app.include_router(tables_router)
+app.include_router(reservations_router)
 
 # ── Webhook verification (GET) ────────────────────────────────────────────────
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { apiFetch, type Table } from "../api";
 import s from "./tables.module.css";
 
@@ -145,6 +146,43 @@ export default function TablesPage() {
       <div className={s.pageInner}>
         <h1 className={s.pageTitle}>Table <em>Management</em></h1>
         <p className={s.subtitle}>Admin panel · La Maison</p>
+
+        {/* ── Navigation ──────────────────────────────────────── */}
+        <div style={{ display: "flex", gap: 16, marginBottom: 32 }}>
+          <span
+            style={{
+              fontFamily: "'DM Mono', monospace",
+              fontSize: "0.68rem",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase" as const,
+              padding: "6px 14px",
+              border: "1px solid var(--gold)",
+              borderRadius: 2,
+              background: "var(--gold)",
+              color: "white",
+              cursor: "default",
+            }}
+          >
+            Tables
+          </span>
+          <Link
+            href="/reservations"
+            style={{
+              fontFamily: "'DM Mono', monospace",
+              fontSize: "0.68rem",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase" as const,
+              color: "var(--muted)",
+              textDecoration: "none",
+              padding: "6px 14px",
+              border: "1px solid var(--border)",
+              borderRadius: 2,
+              transition: "all 0.2s",
+            }}
+          >
+            Reservations
+          </Link>
+        </div>
 
         {/* ── Add form ──────────────────────────────────────────────── */}
         <div className={s.card}>
