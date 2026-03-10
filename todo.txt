@@ -20,3 +20,5 @@ admins
 -> answer client support messages
 
 
+BUG FIXES - > unify error handling should be the same structure for frontend to parse it
+TEST CODE USING UNIT TESTS
