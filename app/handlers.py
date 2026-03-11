@@ -380,7 +380,7 @@ async def handle_ai_suggestions(phone: str, session: dict, text: str, db: AsyncS
     history = session.get("ai_history", [])
 
     try:
-        reply, updated_history = get_ai_suggestion(history, text)
+        reply, updated_history = await get_ai_suggestion(history, text)
         session["ai_history"] = updated_history
         send_text(phone, reply)
     except Exception as e:

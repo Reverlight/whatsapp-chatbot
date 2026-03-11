@@ -241,6 +241,9 @@ export default function ReservationsPage() {
           <span className={`${s.navLink} ${s.navLinkActive}`}>
             Reservations
           </span>
+          <Link href="/menu" className={s.navLink}>
+            Menu
+          </Link>
         </div>
 
         {success && <p className={s.successMsg}>{success}</p>}

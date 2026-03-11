@@ -182,6 +182,23 @@ export default function TablesPage() {
           >
             Reservations
           </Link>
+          <Link
+            href="/menu"
+            style={{
+              fontFamily: "'DM Mono', monospace",
+              fontSize: "0.68rem",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase" as const,
+              color: "var(--muted)",
+              textDecoration: "none",
+              padding: "6px 14px",
+              border: "1px solid var(--border)",
+              borderRadius: 2,
+              transition: "all 0.2s",
+            }}
+          >
+            Menu
+          </Link>
         </div>
 
         {/* ── Add form ──────────────────────────────────────────────── */}

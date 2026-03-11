@@ -1,7 +1,7 @@
 import datetime
 import enum
 
-from sqlalchemy import Boolean, Date, Enum, ForeignKey, Integer, String, Time, func
+from sqlalchemy import Boolean, Date, Enum, ForeignKey, Integer, String, Text, Time, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -80,3 +80,12 @@ class Reservation(Base, AuditMixin):
             f"{self.reservation_date} {self.start_time}–{self.end_time} "
             f"[{self.status}]>"
         )
+
+
+class MenuDocument(Base, AuditMixin):
+    """An uploaded menu PDF. Text is extracted at upload time for AI context."""
+
+    __tablename__ = "menu_documents"
+
+    filename: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    extracted_text: Mapped[str] = mapped_column(Text, nullable=False)

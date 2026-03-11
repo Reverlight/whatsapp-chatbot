@@ -14,3 +14,6 @@ redis>=5.0.0
 
 # OpenAI
 openai>=1.30.0
+
+# PDF
+pypdf>=5.0.0

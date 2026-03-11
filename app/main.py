@@ -26,6 +26,7 @@ from app.redis_client import get_or_create_session, save_session
 from app.senders import send_admin_reply_to_client, send_main_menu
 from app.tables_router import router as tables_router
 from app.reservations_router import router as reservations_router
+from app.menu_router import router as menu_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -43,6 +44,7 @@ app.add_middleware(
 
 app.include_router(tables_router)
 app.include_router(reservations_router)
+app.include_router(menu_router)
 
 # ── Webhook verification (GET) ────────────────────────────────────────────────
 
@@ -104,13 +106,15 @@ def _parse_text(message: dict) -> str | None:
 # ── Router ────────────────────────────────────────────────────────────────────
 
 async def _route(phone: str, text: str) -> None:
+    # Admin reply format: "380671234567 message here" — forward to customer
     if _is_admin(phone):
         customer_phone = _extract_customer_phone(text)
         if customer_phone:
             reply_body = _strip_phone_prefix(text)
             send_admin_reply_to_client(customer_phone, phone, reply_body)
-        return
+            return
 
+    # Normal flow — admins also go through the state machine as regular users
     session = await get_or_create_session(phone)
 
     if text.strip().lower() == "back":
