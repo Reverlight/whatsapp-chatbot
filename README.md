@@ -34,21 +34,6 @@ A Next.js frontend at `http://localhost:3000` gives restaurant staff full contro
 
 ![Demo 1](screenshots/admin_demo1.jpg)
 
-### Table Management
-Add, edit, and remove tables with name, seat count, and active/inactive status.
-
-![Table Management](screenshots/tables.png)
-
-### Reservation Management
-View all reservations with filters by date, status, and phone number. Confirm, cancel, edit, or delete individual reservations.
-
-![Reservation Management](screenshots/reservations.png)
-
-### Menu Management
-Upload menu PDFs that get parsed and indexed for AI-powered dish suggestions via RAG.
-
-![Menu Management](screenshots/menu.png)
-
 ---
 
 ## 🏗 Architecture
