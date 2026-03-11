@@ -16,9 +16,9 @@ import logging
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import settings
-from app.ai_service import get_ai_suggestion
-from app.redis_client import go_back, go_deeper
-from app.reservation_service import (
+from app.modules.ai_service import get_ai_suggestion
+from app.modules.redis_client import go_back, go_deeper
+from app.modules.reservation_service import (
     ReservationError,
     cancel_reservation,
     create_reservation,

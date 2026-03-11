@@ -87,5 +87,5 @@ class MenuDocument(Base, AuditMixin):
 
     __tablename__ = "menu_documents"
 
-    filename: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    filename: Mapped[str] = mapped_column(String(255), unique=False, nullable=False)
     extracted_text: Mapped[str] = mapped_column(Text, nullable=False)

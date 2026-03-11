@@ -13,7 +13,7 @@ from app.main import app
 
 @pytest_asyncio.fixture(scope="function")
 async def async_db_engine():
-    engine = create_async_engine(settings.TEST_QLALCHEMY_DATABASE_URL, echo=False)
+    engine = create_async_engine(settings.TEST_SQLALCHEMY_DATABASE_URL, echo=False)
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

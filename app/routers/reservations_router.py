@@ -21,7 +21,7 @@ from sqlalchemy.orm import selectinload
 
 from app.db import get_async_db_session
 from app.models import Reservation, ReservationStatus, RestaurantTable
-from app.reservation_service import (
+from app.modules.reservation_service import (
     ReservationError,
     find_free_table,
     validate_date,

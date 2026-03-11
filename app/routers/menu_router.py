@@ -1,12 +1,3 @@
-"""
-Admin REST API for menu PDF management.
-
-Endpoints:
-    GET    /api/menu              — list uploaded menu PDFs
-    POST   /api/menu/upload       — upload one or more menu PDFs
-    DELETE /api/menu/{filename}   — remove a menu PDF
-"""
-
 import io
 import logging
 
