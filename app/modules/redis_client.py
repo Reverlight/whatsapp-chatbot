@@ -52,6 +52,7 @@ async def get_redis() -> aioredis.Redis:
 # Low-level set / get / delete
 # ---------------------------------------------------------------------------
 
+
 async def set_state(phone: str, session: dict) -> None:
     r = await get_redis()
     await r.set(_key(phone), json.dumps(session), ex=SESSION_TTL)
@@ -73,6 +74,7 @@ async def delete_state(phone: str) -> None:
 # ---------------------------------------------------------------------------
 # High-level session helpers
 # ---------------------------------------------------------------------------
+
 
 def _default_session() -> dict:
     return {
@@ -105,11 +107,14 @@ async def reset_session(phone: str) -> dict:
 # Navigation helpers (operate in-memory; caller must call save_session)
 # ---------------------------------------------------------------------------
 
+
 def go_deeper(session: dict, next_state: str, context: dict | None = None) -> None:
-    session["stack"].append({
-        "state": session["state"],
-        "context": session.get("current_context", {}),
-    })
+    session["stack"].append(
+        {
+            "state": session["state"],
+            "context": session.get("current_context", {}),
+        }
+    )
     session["state"] = next_state
     session["current_context"] = context or {}
     # Clear AI history when entering a new flow

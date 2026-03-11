@@ -7,13 +7,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Reservation, ReservationStatus, RestaurantTable
 
-
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 FUTURE_DATE = (datetime.date.today() + datetime.timedelta(days=7)).isoformat()
 
 
-async def _seed_table(db: AsyncSession, name: str = "T1", capacity: int = 4) -> RestaurantTable:
+async def _seed_table(
+    db: AsyncSession, name: str = "T1", capacity: int = 4
+) -> RestaurantTable:
     t = RestaurantTable(name=name, capacity=capacity, is_active=True)
     db.add(t)
     await db.commit()
@@ -42,8 +43,11 @@ async def _seed_reservation(
 
 # ── CREATE ────────────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
-async def test_create_reservation_auto_table(async_client: AsyncClient, async_db: AsyncSession):
+async def test_create_reservation_auto_table(
+    async_client: AsyncClient, async_db: AsyncSession
+):
     await _seed_table(async_db, "T1", 4)
 
     response = await async_client.post(
@@ -65,7 +69,9 @@ async def test_create_reservation_auto_table(async_client: AsyncClient, async_db
 
 
 @pytest.mark.asyncio
-async def test_create_reservation_specific_table(async_client: AsyncClient, async_db: AsyncSession):
+async def test_create_reservation_specific_table(
+    async_client: AsyncClient, async_db: AsyncSession
+):
     t = await _seed_table(async_db, "VIP", 6)
 
     response = await async_client.post(
@@ -85,7 +91,9 @@ async def test_create_reservation_specific_table(async_client: AsyncClient, asyn
 
 
 @pytest.mark.asyncio
-async def test_create_reservation_invalid_phone(async_client: AsyncClient, async_db: AsyncSession):
+async def test_create_reservation_invalid_phone(
+    async_client: AsyncClient, async_db: AsyncSession
+):
     await _seed_table(async_db)
 
     response = await async_client.post(
@@ -103,7 +111,9 @@ async def test_create_reservation_invalid_phone(async_client: AsyncClient, async
 
 
 @pytest.mark.asyncio
-async def test_create_reservation_past_date(async_client: AsyncClient, async_db: AsyncSession):
+async def test_create_reservation_past_date(
+    async_client: AsyncClient, async_db: AsyncSession
+):
     await _seed_table(async_db)
     past = (datetime.date.today() - datetime.timedelta(days=1)).isoformat()
 
@@ -122,7 +132,9 @@ async def test_create_reservation_past_date(async_client: AsyncClient, async_db:
 
 
 @pytest.mark.asyncio
-async def test_create_reservation_table_too_small(async_client: AsyncClient, async_db: AsyncSession):
+async def test_create_reservation_table_too_small(
+    async_client: AsyncClient, async_db: AsyncSession
+):
     t = await _seed_table(async_db, "Small", 2)
 
     response = await async_client.post(
@@ -142,6 +154,7 @@ async def test_create_reservation_table_too_small(async_client: AsyncClient, asy
 
 # ── LIST ──────────────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_list_reservations(async_client: AsyncClient, async_db: AsyncSession):
     t = await _seed_table(async_db)
@@ -153,7 +166,9 @@ async def test_list_reservations(async_client: AsyncClient, async_db: AsyncSessi
 
 
 @pytest.mark.asyncio
-async def test_list_reservations_filter_status(async_client: AsyncClient, async_db: AsyncSession):
+async def test_list_reservations_filter_status(
+    async_client: AsyncClient, async_db: AsyncSession
+):
     t = await _seed_table(async_db)
     await _seed_reservation(async_db, t)
 
@@ -167,6 +182,7 @@ async def test_list_reservations_filter_status(async_client: AsyncClient, async_
 
 
 # ── GET ONE ───────────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_get_reservation(async_client: AsyncClient, async_db: AsyncSession):
@@ -185,6 +201,7 @@ async def test_get_reservation_not_found(async_client: AsyncClient):
 
 
 # ── UPDATE ────────────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_update_reservation(async_client: AsyncClient, async_db: AsyncSession):
@@ -211,6 +228,7 @@ async def test_update_reservation_not_found(async_client: AsyncClient):
 
 # ── CANCEL ────────────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_cancel_reservation(async_client: AsyncClient, async_db: AsyncSession):
     t = await _seed_table(async_db)
@@ -222,7 +240,9 @@ async def test_cancel_reservation(async_client: AsyncClient, async_db: AsyncSess
 
 
 @pytest.mark.asyncio
-async def test_cancel_already_cancelled(async_client: AsyncClient, async_db: AsyncSession):
+async def test_cancel_already_cancelled(
+    async_client: AsyncClient, async_db: AsyncSession
+):
     t = await _seed_table(async_db)
     r = await _seed_reservation(async_db, t)
     r.status = ReservationStatus.CANCELLED
@@ -239,6 +259,7 @@ async def test_cancel_not_found(async_client: AsyncClient):
 
 
 # ── DELETE ────────────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_delete_reservation(async_client: AsyncClient, async_db: AsyncSession):

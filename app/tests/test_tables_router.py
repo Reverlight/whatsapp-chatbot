@@ -5,10 +5,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Reservation, ReservationStatus, RestaurantTable
 
-
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-async def _seed_table(db: AsyncSession, name: str = "T1", capacity: int = 4) -> RestaurantTable:
+
+async def _seed_table(
+    db: AsyncSession, name: str = "T1", capacity: int = 4
+) -> RestaurantTable:
     t = RestaurantTable(name=name, capacity=capacity, is_active=True)
     db.add(t)
     await db.commit()
@@ -17,6 +19,7 @@ async def _seed_table(db: AsyncSession, name: str = "T1", capacity: int = 4) -> 
 
 
 # ── CREATE ────────────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_create_table(async_client: AsyncClient, async_db: AsyncSession):
@@ -44,6 +47,7 @@ async def test_create_duplicate_name(async_client: AsyncClient, async_db: AsyncS
 
 # ── LIST ──────────────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_list_tables(async_client: AsyncClient, async_db: AsyncSession):
     await _seed_table(async_db, "A1", 2)
@@ -55,7 +59,9 @@ async def test_list_tables(async_client: AsyncClient, async_db: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_list_tables_active_only(async_client: AsyncClient, async_db: AsyncSession):
+async def test_list_tables_active_only(
+    async_client: AsyncClient, async_db: AsyncSession
+):
     await _seed_table(async_db, "Active")
     inactive = RestaurantTable(name="Inactive", capacity=2, is_active=False)
     async_db.add(inactive)
@@ -69,6 +75,7 @@ async def test_list_tables_active_only(async_client: AsyncClient, async_db: Asyn
 
 
 # ── GET ONE ───────────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_get_table(async_client: AsyncClient, async_db: AsyncSession):
@@ -87,6 +94,7 @@ async def test_get_table_not_found(async_client: AsyncClient):
 
 # ── UPDATE ────────────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_update_table(async_client: AsyncClient, async_db: AsyncSession):
     t = await _seed_table(async_db)
@@ -100,7 +108,9 @@ async def test_update_table(async_client: AsyncClient, async_db: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_update_rename_duplicate(async_client: AsyncClient, async_db: AsyncSession):
+async def test_update_rename_duplicate(
+    async_client: AsyncClient, async_db: AsyncSession
+):
     await _seed_table(async_db, "T1")
     t2 = await _seed_table(async_db, "T2")
 
@@ -118,6 +128,7 @@ async def test_update_not_found(async_client: AsyncClient):
 
 
 # ── DELETE ────────────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_delete_table(async_client: AsyncClient, async_db: AsyncSession):

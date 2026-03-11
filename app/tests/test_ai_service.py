@@ -2,13 +2,21 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.modules.ai_service import BASE_SYSTEM_PROMPT, _build_system_prompt, get_ai_suggestion
+from app.modules.ai_service import (
+    BASE_SYSTEM_PROMPT,
+    _build_system_prompt,
+    get_ai_suggestion,
+)
 
 
 @pytest.mark.asyncio
 async def test_build_prompt_no_menu():
     """Without menu documents, the base prompt is returned as-is."""
-    with patch("app.modules.ai_service._load_menu_context", new_callable=AsyncMock, return_value=""):
+    with patch(
+        "app.modules.ai_service._load_menu_context",
+        new_callable=AsyncMock,
+        return_value="",
+    ):
         prompt = await _build_system_prompt()
 
     assert prompt == BASE_SYSTEM_PROMPT
@@ -20,7 +28,11 @@ async def test_build_prompt_with_menu():
     """When menu documents exist, their text is appended to the prompt."""
     menu_text = "=== menu.pdf ===\nMargherita Pizza - $12"
 
-    with patch("app.modules.ai_service._load_menu_context", new_callable=AsyncMock, return_value=menu_text):
+    with patch(
+        "app.modules.ai_service._load_menu_context",
+        new_callable=AsyncMock,
+        return_value=menu_text,
+    ):
         prompt = await _build_system_prompt()
 
     assert "--- RESTAURANT MENU ---" in prompt
@@ -50,7 +62,11 @@ async def test_get_ai_suggestion_returns_reply():
     mock_response.choices = [mock_choice]
 
     with (
-        patch("app.modules.ai_service._build_system_prompt", new_callable=AsyncMock, return_value="system prompt"),
+        patch(
+            "app.modules.ai_service._build_system_prompt",
+            new_callable=AsyncMock,
+            return_value="system prompt",
+        ),
         patch("app.modules.ai_service._client") as mock_client,
     ):
         mock_client.chat.completions.create.return_value = mock_response
@@ -77,7 +93,11 @@ async def test_get_ai_suggestion_preserves_history():
     mock_response.choices = [mock_choice]
 
     with (
-        patch("app.modules.ai_service._build_system_prompt", new_callable=AsyncMock, return_value="prompt"),
+        patch(
+            "app.modules.ai_service._build_system_prompt",
+            new_callable=AsyncMock,
+            return_value="prompt",
+        ),
         patch("app.modules.ai_service._client") as mock_client,
     ):
         mock_client.chat.completions.create.return_value = mock_response
@@ -108,7 +128,11 @@ async def test_get_ai_suggestion_caps_history_at_40():
     mock_response.choices = [mock_choice]
 
     with (
-        patch("app.modules.ai_service._build_system_prompt", new_callable=AsyncMock, return_value="prompt"),
+        patch(
+            "app.modules.ai_service._build_system_prompt",
+            new_callable=AsyncMock,
+            return_value="prompt",
+        ),
         patch("app.modules.ai_service._client") as mock_client,
     ):
         mock_client.chat.completions.create.return_value = mock_response

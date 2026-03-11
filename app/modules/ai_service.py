@@ -47,8 +47,9 @@ async def _load_menu_context() -> str:
     """Load all menu texts from the database."""
     async with async_sessionmaker() as db:
         result = await db.execute(
-            select(MenuDocument.filename, MenuDocument.extracted_text)
-            .order_by(MenuDocument.created_at)
+            select(MenuDocument.filename, MenuDocument.extracted_text).order_by(
+                MenuDocument.created_at
+            )
         )
         docs = result.all()
 
@@ -80,7 +81,9 @@ async def _build_system_prompt() -> str:
     )
 
 
-async def get_ai_suggestion(history: list[dict], user_message: str) -> tuple[str, list[dict]]:
+async def get_ai_suggestion(
+    history: list[dict], user_message: str
+) -> tuple[str, list[dict]]:
     """
     Send the user message to OpenAI with the full conversation history.
 
@@ -109,7 +112,7 @@ async def get_ai_suggestion(history: list[dict], user_message: str) -> tuple[str
     reply = response.choices[0].message.content.strip()
 
     updated_history = history + [
-        {"role": "user",      "content": user_message},
+        {"role": "user", "content": user_message},
         {"role": "assistant", "content": reply},
     ]
 

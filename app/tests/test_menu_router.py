@@ -9,7 +9,6 @@ from app.factories import MenuDocumentFactory
 from app.models import MenuDocument
 from app.main import app
 
-
 SAMPLE_MENU_TEXT = "Margherita Pizza - $12\nCarbonara Pasta - $15"
 
 
@@ -70,7 +69,9 @@ async def test_upload_rejects_non_pdf(async_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_upload_replaces_existing(async_client: AsyncClient, async_db: AsyncSession):
+async def test_upload_replaces_existing(
+    async_client: AsyncClient, async_db: AsyncSession
+):
     """Re-uploading a file with the same name replaces the old one."""
     await MenuDocumentFactory.create(
         async_db, filename="menu.pdf", extracted_text="Old menu"

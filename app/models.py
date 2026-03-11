@@ -1,13 +1,23 @@
 import datetime
 import enum
 
-from sqlalchemy import Boolean, Date, Enum, ForeignKey, Integer, String, Text, Time, func
+from sqlalchemy import (
+    Boolean,
+    Date,
+    Enum,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    Time,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
 
-
 # ── Mixins ────────────────────────────────────────────────────────────────────
+
 
 class AuditMixin:
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -19,14 +29,16 @@ class AuditMixin:
 
 # ── Enums ─────────────────────────────────────────────────────────────────────
 
+
 class ReservationStatus(str, enum.Enum):
     CONFIRMED = "confirmed"
     COMPLETED = "completed"
     CANCELLED = "cancelled"
-    NO_SHOW   = "no_show"
+    NO_SHOW = "no_show"
 
 
 # ── Models ────────────────────────────────────────────────────────────────────
+
 
 class RestaurantTable(Base, AuditMixin):
     """A physical table in the restaurant, managed by admins."""
@@ -59,7 +71,9 @@ class Reservation(Base, AuditMixin):
     table_id: Mapped[int | None] = mapped_column(
         ForeignKey("restaurant_tables.id"), nullable=True, index=True
     )
-    reservation_date: Mapped[datetime.date] = mapped_column(Date, nullable=False, index=True)
+    reservation_date: Mapped[datetime.date] = mapped_column(
+        Date, nullable=False, index=True
+    )
     start_time: Mapped[datetime.time] = mapped_column(Time, nullable=False)
     end_time: Mapped[datetime.time] = mapped_column(Time, nullable=False)
     guests: Mapped[int] = mapped_column(Integer, nullable=False, default=1)

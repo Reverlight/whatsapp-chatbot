@@ -9,8 +9,8 @@ from httpx import AsyncClient
 
 from app.main import _parse_text, _verify_signature, app
 
-
 # ── Webhook payload builder ───────────────────────────────────────────────────
+
 
 def _whatsapp_payload(phone: str, text: str) -> dict:
     """Build a minimal valid WhatsApp webhook payload with a text message."""
@@ -65,6 +65,7 @@ def _interactive_payload(phone: str, reply_type: str, reply_id: str) -> dict:
 
 # ── _parse_text ───────────────────────────────────────────────────────────────
 
+
 def test_parse_text_message():
     msg = {"type": "text", "text": {"body": "  hello  "}}
     assert _parse_text(msg) == "hello"
@@ -111,6 +112,7 @@ def test_verify_signature_invalid():
 
 # ── GET / (webhook verification) ──────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_webhook_verify_success(async_client: AsyncClient):
     with patch("app.main.settings") as mock_settings:
@@ -140,6 +142,7 @@ async def test_webhook_verify_bad_token(async_client: AsyncClient):
 
 
 # ── POST / (incoming messages) ────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_receive_text_message(async_client: AsyncClient):

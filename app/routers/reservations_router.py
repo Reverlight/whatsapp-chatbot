@@ -36,6 +36,7 @@ _PHONE_RE = re.compile(r"^\+?\d{7,15}$")
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
+
 def _validate_and_normalize_phone(raw: str) -> str:
     """
     Validate that `raw` looks like a phone number (optional '+' prefix,
@@ -61,11 +62,16 @@ def _reservation_query():
 
 # ── LIST ─────────────────────────────────────────────────────────────────────
 
+
 @router.get("", response_model=list[ReservationRead])
 async def list_reservations(
-    date: Optional[datetime.date] = Query(None, description="Filter by reservation date"),
+    date: Optional[datetime.date] = Query(
+        None, description="Filter by reservation date"
+    ),
     status: Optional[ReservationStatus] = Query(None, description="Filter by status"),
-    phone: Optional[str] = Query(None, description="Filter by guest phone (partial match)"),
+    phone: Optional[str] = Query(
+        None, description="Filter by guest phone (partial match)"
+    ),
     upcoming: bool = Query(False, description="Only future confirmed reservations"),
     limit: int = Query(100, ge=1, le=500),
     offset: int = Query(0, ge=0),
@@ -86,8 +92,9 @@ async def list_reservations(
         )
 
     stmt = (
-        stmt
-        .order_by(Reservation.reservation_date.desc(), Reservation.start_time.desc())
+        stmt.order_by(
+            Reservation.reservation_date.desc(), Reservation.start_time.desc()
+        )
         .limit(limit)
         .offset(offset)
     )
@@ -97,6 +104,7 @@ async def list_reservations(
 
 
 # ── CREATE ───────────────────────────────────────────────────────────────────
+
 
 @router.post("", response_model=ReservationRead, status_code=201)
 async def create_reservation(
@@ -124,7 +132,11 @@ async def create_reservation(
     else:
         try:
             table = await find_free_table(
-                db, body.reservation_date, body.start_time, body.end_time, body.guests,
+                db,
+                body.reservation_date,
+                body.start_time,
+                body.end_time,
+                body.guests,
             )
         except ReservationError as exc:
             raise HTTPException(status_code=409, detail=str(exc))
@@ -151,6 +163,7 @@ async def create_reservation(
 
 # ── GET ONE ──────────────────────────────────────────────────────────────────
 
+
 @router.get("/{reservation_id}", response_model=ReservationRead)
 async def get_reservation(
     reservation_id: int,
@@ -166,6 +179,7 @@ async def get_reservation(
 
 
 # ── UPDATE ───────────────────────────────────────────────────────────────────
+
 
 @router.patch("/{reservation_id}", response_model=ReservationRead)
 async def update_reservation(
@@ -219,6 +233,7 @@ async def update_reservation(
 
 # ── CANCEL ───────────────────────────────────────────────────────────────────
 
+
 @router.post("/{reservation_id}/cancel", response_model=ReservationRead)
 async def cancel_reservation(
     reservation_id: int,
@@ -246,6 +261,7 @@ async def cancel_reservation(
 
 
 # ── DELETE ───────────────────────────────────────────────────────────────────
+
 
 @router.delete("/{reservation_id}", status_code=204)
 async def delete_reservation(

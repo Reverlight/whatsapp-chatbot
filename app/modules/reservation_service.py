@@ -19,8 +19,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app import settings
 from app.models import Reservation, ReservationStatus, RestaurantTable
 
-
 # ── Exceptions ────────────────────────────────────────────────────────────────
+
 
 class ReservationError(Exception):
     """Raised when a reservation cannot be made."""
@@ -28,7 +28,10 @@ class ReservationError(Exception):
 
 # ── Queries ───────────────────────────────────────────────────────────────────
 
-async def get_active_reservation(session: AsyncSession, phone: str) -> Optional[Reservation]:
+
+async def get_active_reservation(
+    session: AsyncSession, phone: str
+) -> Optional[Reservation]:
     """Return the customer's single active future reservation, if any."""
     result = await session.execute(
         select(Reservation)
@@ -85,8 +88,7 @@ async def find_free_table(
 
     # Find booked table IDs for overlapping time slots on this date
     booked_result = await session.execute(
-        select(Reservation.table_id)
-        .where(
+        select(Reservation.table_id).where(
             Reservation.reservation_date == date,
             Reservation.status == ReservationStatus.CONFIRMED,
             Reservation.table_id.isnot(None),
@@ -126,11 +128,14 @@ async def find_free_table(
 
 # ── Validation ────────────────────────────────────────────────────────────────
 
+
 def validate_date(date: datetime.date) -> None:
     today = datetime.date.today()
 
     if date < today:
-        raise ReservationError("❌ That date is in the past. Please pick a future date.")
+        raise ReservationError(
+            "❌ That date is in the past. Please pick a future date."
+        )
 
     max_date = today + datetime.timedelta(days=settings.RESERVATION_MAX_ADVANCE_DAYS)
     if date > max_date:
@@ -146,6 +151,7 @@ def validate_date(date: datetime.date) -> None:
 
 
 # ── Write operations ──────────────────────────────────────────────────────────
+
 
 async def create_reservation(
     session: AsyncSession,

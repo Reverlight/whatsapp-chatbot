@@ -57,6 +57,7 @@ async def _route(phone: str, text: str) -> None:
     if text.strip().lower() == "back":
         from app.modules.redis_client import go_back
         from app.modules.handlers import _render_state
+
         go_back(session)
         await save_session(phone, session)
         _render_state(phone, session)

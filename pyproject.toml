@@ -19,6 +19,7 @@ dependencies = [
     "uvicorn[standard]>=0.41.0",
     "pypdf>=5.0.0",
     "python-multipart>=0.0.22",
+    "black>=26.3.0",
 ]
 # pyproject.toml
 [tool.coverage.run]

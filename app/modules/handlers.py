@@ -46,6 +46,7 @@ logger = logging.getLogger(__name__)
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _is_back(text: str) -> bool:
     return text.strip().lower() == "back"
 
@@ -54,7 +55,7 @@ def _render_state(phone: str, session: dict) -> None:
     """Re-render the current state's entry menu (used after go_back)."""
     renderers = {
         "MAIN_MENU": lambda: send_main_menu(phone),
-        "CONTACT":   lambda: send_contact_menu(phone),
+        "CONTACT": lambda: send_contact_menu(phone),
         "RESERVATION": lambda: send_reservation_date_prompt(phone),
     }
     fn = renderers.get(session["state"])
@@ -68,12 +69,17 @@ def _render_state(phone: str, session: dict) -> None:
 # MAIN_MENU
 # ---------------------------------------------------------------------------
 
-async def handle_main_menu(phone: str, session: dict, text: str, db: AsyncSession) -> None:
+
+async def handle_main_menu(
+    phone: str, session: dict, text: str, db: AsyncSession
+) -> None:
     if text == "show_menu":
         send_text(phone, f"🍽 Here's our full menu:\n{settings.MENU_URL}")
 
     elif text == "info":
-        send_text(phone, f"ℹ️ *{settings.RESTAURANT_NAME}*\n\n{settings.RESTAURANT_INFO}")
+        send_text(
+            phone, f"ℹ️ *{settings.RESTAURANT_NAME}*\n\n{settings.RESTAURANT_INFO}"
+        )
 
     elif text == "contact":
         go_deeper(session, "CONTACT")
@@ -101,7 +107,10 @@ async def handle_main_menu(phone: str, session: dict, text: str, db: AsyncSessio
 # CONTACT
 # ---------------------------------------------------------------------------
 
-async def handle_contact(phone: str, session: dict, text: str, db: AsyncSession) -> None:
+
+async def handle_contact(
+    phone: str, session: dict, text: str, db: AsyncSession
+) -> None:
     if _is_back(text):
         go_back(session)
         _render_state(phone, session)
@@ -127,7 +136,10 @@ async def handle_contact(phone: str, session: dict, text: str, db: AsyncSession)
 # CONTACT_CHAT
 # ---------------------------------------------------------------------------
 
-async def handle_contact_chat(phone: str, session: dict, text: str, db: AsyncSession) -> None:
+
+async def handle_contact_chat(
+    phone: str, session: dict, text: str, db: AsyncSession
+) -> None:
     if _is_back(text):
         go_back(session)
         _render_state(phone, session)
@@ -143,10 +155,13 @@ async def handle_contact_chat(phone: str, session: dict, text: str, db: AsyncSes
 
 # ── RESERVATION step handlers ─────────────────────────────────────────────────
 
+
 async def _reservation_date(phone, ctx, text, db, session):
     existing = await get_active_reservation(db, phone)
     if existing:
-        send_cancel_reservation_menu(phone, _fmt(existing.reservation_date), existing.guests)
+        send_cancel_reservation_menu(
+            phone, _fmt(existing.reservation_date), existing.guests
+        )
         ctx.update(step="has_existing", existing_id=existing.id)
         return
 
@@ -194,7 +209,9 @@ async def _reservation_end_time(phone, ctx, text, db, session):
 async def _reservation_guests(phone, ctx, text, db, session):
     if _is_back(text):
         ctx["step"] = "end_time"
-        send_reservation_end_time_prompt(phone, datetime.time.fromisoformat(ctx["start_time"]))
+        send_reservation_end_time_prompt(
+            phone, datetime.time.fromisoformat(ctx["start_time"])
+        )
         return
 
     guests = _parse_guests(phone, text)
@@ -290,10 +307,13 @@ async def _reservation_has_existing(phone, ctx, text, db, session):
     else:
         existing = await get_active_reservation(db, phone)
         if existing:
-            send_cancel_reservation_menu(phone, _fmt(existing.reservation_date), existing.guests)
+            send_cancel_reservation_menu(
+                phone, _fmt(existing.reservation_date), existing.guests
+            )
 
 
 # ── Parsers ───────────────────────────────────────────────────────────────────
+
 
 def _parse_date(phone: str, text: str) -> datetime.date | None:
     try:
@@ -330,6 +350,7 @@ def _parse_guests(phone: str, text: str) -> int | None:
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
+
 def _fmt(date: datetime.date) -> str:
     return date.strftime("%d.%m.%Y")
 
@@ -349,17 +370,19 @@ def _confirmed_message(r, table) -> str:
 # ── RESERVATION dispatcher (defined after step functions so names are resolved) ──
 
 RESERVATION_STEP_HANDLERS = {
-    "date":         _reservation_date,
-    "time":         _reservation_time,
-    "end_time":     _reservation_end_time,
-    "guests":       _reservation_guests,
-    "guest_name":   _reservation_guest_name,
-    "confirm":      _reservation_confirm,
+    "date": _reservation_date,
+    "time": _reservation_time,
+    "end_time": _reservation_end_time,
+    "guests": _reservation_guests,
+    "guest_name": _reservation_guest_name,
+    "confirm": _reservation_confirm,
     "has_existing": _reservation_has_existing,
 }
 
 
-async def handle_reservation(phone: str, session: dict, text: str, db: AsyncSession) -> None:
+async def handle_reservation(
+    phone: str, session: dict, text: str, db: AsyncSession
+) -> None:
     ctx = session.setdefault("current_context", {})
     step = ctx.get("step", "date")
     handler = RESERVATION_STEP_HANDLERS.get(step)
@@ -371,7 +394,10 @@ async def handle_reservation(phone: str, session: dict, text: str, db: AsyncSess
 # AI_SUGGESTIONS
 # ---------------------------------------------------------------------------
 
-async def handle_ai_suggestions(phone: str, session: dict, text: str, db: AsyncSession) -> None:
+
+async def handle_ai_suggestions(
+    phone: str, session: dict, text: str, db: AsyncSession
+) -> None:
     if _is_back(text):
         go_back(session)
         _render_state(phone, session)
@@ -385,7 +411,10 @@ async def handle_ai_suggestions(phone: str, session: dict, text: str, db: AsyncS
         send_text(phone, reply)
     except Exception as e:
         logger.error(f"OpenAI error: {e}")
-        send_text(phone, "⚠️ Sorry, the AI assistant is temporarily unavailable. Please try again later.")
+        send_text(
+            phone,
+            "⚠️ Sorry, the AI assistant is temporarily unavailable. Please try again later.",
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -393,9 +422,9 @@ async def handle_ai_suggestions(phone: str, session: dict, text: str, db: AsyncS
 # ---------------------------------------------------------------------------
 
 HANDLERS = {
-    "MAIN_MENU":      handle_main_menu,
-    "CONTACT":        handle_contact,
-    "CONTACT_CHAT":   handle_contact_chat,
-    "RESERVATION":    handle_reservation,
+    "MAIN_MENU": handle_main_menu,
+    "CONTACT": handle_contact,
+    "CONTACT_CHAT": handle_contact_chat,
+    "RESERVATION": handle_reservation,
     "AI_SUGGESTIONS": handle_ai_suggestions,
 }

@@ -15,7 +15,14 @@ import json
 import logging
 from contextlib import asynccontextmanager
 
-from app.modules.helpers import _extract_customer_phone, _is_admin, _parse_text, _route, _strip_phone_prefix, _verify_signature
+from app.modules.helpers import (
+    _extract_customer_phone,
+    _is_admin,
+    _parse_text,
+    _route,
+    _strip_phone_prefix,
+    _verify_signature,
+)
 from fastapi import FastAPI, Request, Response
 
 from app import settings
@@ -44,6 +51,7 @@ app.add_middleware(
 app.include_router(tables_router)
 app.include_router(reservations_router)
 app.include_router(menu_router)
+
 
 # ── Webhook verification (GET) ────────────────────────────────────────────────
 @app.get("/")

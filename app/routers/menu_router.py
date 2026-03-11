@@ -30,8 +30,9 @@ async def list_menu_files(
     db: AsyncSession = Depends(get_async_db_session),
 ) -> list[dict]:
     result = await db.execute(
-        select(MenuDocument.id, MenuDocument.filename, MenuDocument.created_at)
-        .order_by(MenuDocument.created_at.desc())
+        select(
+            MenuDocument.id, MenuDocument.filename, MenuDocument.created_at
+        ).order_by(MenuDocument.created_at.desc())
     )
     return [
         {"id": row.id, "filename": row.filename, "created_at": str(row.created_at)}

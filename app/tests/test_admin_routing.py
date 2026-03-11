@@ -4,12 +4,12 @@ import pytest
 
 from app.modules.helpers import _is_admin, _extract_customer_phone, _route
 
-
 ADMIN_PHONE = "380991234567"
 CUSTOMER_PHONE = "380667654321"
 
 
 # ── Unit tests for helper functions ───────────────────────────────────────────
+
 
 def test_is_admin_positive():
     with patch("app.modules.helpers.settings") as mock_settings:
@@ -43,19 +43,24 @@ def test_extract_customer_phone_no_phone():
 
 # ── Integration tests for _route ──────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_admin_reply_forwards_to_customer():
     """Admin message with phone prefix forwards reply and returns early."""
     with (
         patch("app.modules.helpers.settings") as mock_settings,
         patch("app.modules.helpers.send_admin_reply_to_client") as mock_forward,
-        patch("app.modules.helpers.get_or_create_session", new_callable=AsyncMock) as mock_session,
+        patch(
+            "app.modules.helpers.get_or_create_session", new_callable=AsyncMock
+        ) as mock_session,
     ):
         mock_settings.ADMIN_PHONES = [ADMIN_PHONE]
 
         await _route(ADMIN_PHONE, f"{CUSTOMER_PHONE} Your table is ready!")
 
-        mock_forward.assert_called_once_with(CUSTOMER_PHONE, ADMIN_PHONE, "Your table is ready!")
+        mock_forward.assert_called_once_with(
+            CUSTOMER_PHONE, ADMIN_PHONE, "Your table is ready!"
+        )
         mock_session.assert_not_called()
 
 
@@ -65,7 +70,9 @@ async def test_admin_normal_message_enters_user_flow():
     with (
         patch("app.modules.helpers.settings") as mock_settings,
         patch("app.modules.helpers.send_admin_reply_to_client") as mock_forward,
-        patch("app.modules.helpers.get_or_create_session", new_callable=AsyncMock) as mock_session,
+        patch(
+            "app.modules.helpers.get_or_create_session", new_callable=AsyncMock
+        ) as mock_session,
         patch("app.modules.helpers.save_session", new_callable=AsyncMock),
         patch("app.modules.helpers.HANDLERS") as mock_handlers,
         patch("app.modules.helpers.async_sessionmaker") as mock_db_factory,
@@ -93,7 +100,9 @@ async def test_regular_user_enters_user_flow():
     with (
         patch("app.modules.helpers.settings") as mock_settings,
         patch("app.modules.helpers.send_admin_reply_to_client") as mock_forward,
-        patch("app.modules.helpers.get_or_create_session", new_callable=AsyncMock) as mock_session,
+        patch(
+            "app.modules.helpers.get_or_create_session", new_callable=AsyncMock
+        ) as mock_session,
         patch("app.modules.helpers.save_session", new_callable=AsyncMock),
         patch("app.modules.helpers.HANDLERS") as mock_handlers,
         patch("app.modules.helpers.async_sessionmaker") as mock_db_factory,

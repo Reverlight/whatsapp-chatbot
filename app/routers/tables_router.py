@@ -22,6 +22,7 @@ router = APIRouter(prefix="/api/tables", tags=["tables"])
 
 # ── LIST ──────────────────────────────────────────────────────────────────────
 
+
 @router.get("", response_model=list[TableRead])
 async def list_tables(
     active_only: bool = Query(False, description="Return only active tables"),
@@ -37,6 +38,7 @@ async def list_tables(
 
 # ── CREATE ────────────────────────────────────────────────────────────────────
 
+
 @router.post("", response_model=TableRead, status_code=201)
 async def create_table(
     body: TableCreate,
@@ -49,7 +51,9 @@ async def create_table(
         )
     )
     if existing.scalar_one_or_none():
-        raise HTTPException(status_code=409, detail="A table with this name already exists.")
+        raise HTTPException(
+            status_code=409, detail="A table with this name already exists."
+        )
 
     table = RestaurantTable(
         name=body.name.strip(),
@@ -64,6 +68,7 @@ async def create_table(
 
 # ── GET ONE ───────────────────────────────────────────────────────────────────
 
+
 @router.get("/{table_id}", response_model=TableRead)
 async def get_table(
     table_id: int,
@@ -76,6 +81,7 @@ async def get_table(
 
 
 # ── UPDATE ────────────────────────────────────────────────────────────────────
+
 
 @router.patch("/{table_id}", response_model=TableRead)
 async def update_table(
@@ -99,7 +105,9 @@ async def update_table(
             )
         )
         if dup.scalar_one_or_none():
-            raise HTTPException(status_code=409, detail="A table with this name already exists.")
+            raise HTTPException(
+                status_code=409, detail="A table with this name already exists."
+            )
         updates["name"] = new_name
 
     for field, value in updates.items():
@@ -111,6 +119,7 @@ async def update_table(
 
 
 # ── DELETE ────────────────────────────────────────────────────────────────────
+
 
 @router.delete("/{table_id}", status_code=204)
 async def delete_table(
@@ -134,7 +143,7 @@ async def delete_table(
         raise HTTPException(
             status_code=409,
             detail="Cannot delete a table with confirmed reservations. "
-                   "Cancel or reassign them first.",
+            "Cancel or reassign them first.",
         )
 
     await db.delete(table)

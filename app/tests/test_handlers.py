@@ -22,6 +22,7 @@ def _fresh_session(state: str = "MAIN_MENU") -> dict:
 
 # ── MAIN_MENU ─────────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 @patch("app.modules.handlers.send_text")
 async def test_main_menu_show_menu(mock_send: MagicMock):
@@ -85,6 +86,7 @@ async def test_main_menu_unknown_text(mock_send: MagicMock):
 
 # ── CONTACT ───────────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 @patch("app.modules.handlers.send_text")
 async def test_contact_chat_admin(mock_send: MagicMock):
@@ -122,6 +124,7 @@ async def test_contact_back(mock_send: MagicMock):
 
 # ── CONTACT_CHAT ──────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 @patch("app.modules.handlers.send_text")
 @patch("app.modules.handlers.forward_to_admins")
@@ -157,14 +160,18 @@ async def test_contact_chat_back(mock_send: MagicMock):
 
 # ── AI_SUGGESTIONS ────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 @patch("app.modules.handlers.send_text")
 @patch("app.modules.handlers.get_ai_suggestion", new_callable=AsyncMock)
 async def test_ai_suggestions_reply(mock_ai: AsyncMock, mock_send: MagicMock):
-    mock_ai.return_value = ("Try our pizza!", [
-        {"role": "user", "content": "What's good?"},
-        {"role": "assistant", "content": "Try our pizza!"},
-    ])
+    mock_ai.return_value = (
+        "Try our pizza!",
+        [
+            {"role": "user", "content": "What's good?"},
+            {"role": "assistant", "content": "Try our pizza!"},
+        ],
+    )
 
     session = _fresh_session("AI_SUGGESTIONS")
     session["stack"] = [{"state": "MAIN_MENU", "context": {}}]
