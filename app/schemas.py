@@ -9,8 +9,8 @@ from pydantic import BaseModel, Field
 
 from app.models import ReservationStatus
 
-
 # ── RestaurantTable ───────────────────────────────────────────────────────────
+
 
 class TableCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=20, examples=["T1", "Bar-3"])
@@ -36,6 +36,7 @@ class TableRead(BaseModel):
 
 
 # ── Reservation ───────────────────────────────────────────────────────────────
+
 
 class ReservationCreate(BaseModel):
     guest_name: str = Field(..., min_length=1, max_length=100, examples=["John Doe"])

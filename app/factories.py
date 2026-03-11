@@ -1,7 +1,7 @@
 import datetime
 
 from app.db import AsyncSession
-from app.models import Email
+from app.models import MenuDocument
 
 
 class AsyncBaseFactory:
@@ -25,13 +25,9 @@ class AsyncBaseFactory:
 # --- factories ---
 
 
-class EmailFactory(AsyncBaseFactory):
-    model = Email
+class MenuDocumentFactory(AsyncBaseFactory):
+    model = MenuDocument
     defaults = {
-        "google_id": "msg_001",
-        "thread_id": "thread_001",
-        "title": "Test Email",
-        "text": "Test body",
-        "sender": "test@example.com",
-        "received_date": datetime.datetime(2024, 1, 15, 10, 30, 0),
+        "filename": "menu.pdf",
+        "extracted_text": "Margherita Pizza - $12\nCarbonara Pasta - $15",
     }
