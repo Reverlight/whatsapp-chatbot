@@ -26,7 +26,7 @@ A production-ready WhatsApp chatbot for restaurant businesses — built with **F
 
 A Next.js frontend at `http://localhost:3000` gives restaurant staff full control over tables, reservations, and menu documents.
 
-![Admin 2](screenshots/frontend_demo2.png)
+![Admin 2](screenshots/frontend_demo4.png)
 
 ---
 
