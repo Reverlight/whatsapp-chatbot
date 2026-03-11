@@ -26,19 +26,13 @@ A production-ready WhatsApp chatbot for restaurant businesses — built with **F
 
 A Next.js frontend at `http://localhost:3000` gives restaurant staff full control over tables, reservations, and menu documents.
 
-![Admin 1](screenshots/frontend_demo1.png)
 ![Admin 2](screenshots/frontend_demo2.png)
-![Admin 3](screenshots/frontend_demo3.png)
 
 ---
 
 ## 📱 App Demo (WhatsApp)
 
 ![Demo 1](screenshots/admin_demo1.jpg)
-![Demo 2](screenshots/admin_demo2.jpg)
-![Demo 3](screenshots/admin_demo3.jpg)
-![Demo 4](screenshots/admin_demo4.jpg)
-![Demo 5](screenshots/admin_demo5.jpg)
 
 ### Table Management
 Add, edit, and remove tables with name, seat count, and active/inactive status.
