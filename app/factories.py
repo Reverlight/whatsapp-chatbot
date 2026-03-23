@@ -22,12 +22,11 @@ class AsyncBaseFactory:
         return [await cls.create(session, **kwargs) for _ in range(size)]
 
 
-# --- factories ---
 
 
-class MenuDocumentFactory(AsyncBaseFactory):
-    model = MenuDocument
-    defaults = {
-        "filename": "menu.pdf",
-        "extracted_text": "Margherita Pizza - $12\nCarbonara Pasta - $15",
-    }
+# class MenuDocumentFactory(AsyncBaseFactory):
+#     model = MenuDocument
+#     defaults = {
+#         "filename": "menu.pdf",
+#         "extracted_text": "Margherita Pizza - $12\nCarbonara Pasta - $15",
+#     }
